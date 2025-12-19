@@ -1,0 +1,52 @@
+version: '3.9'
+
+services:
+  # ---------------------------
+  #  RabbitMQ
+  # ---------------------------
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: pass
+    restart: always
+
+  # ---------------------------
+  #  Base de datos del MS-PRODUCTO
+  # ---------------------------
+  db_producto:
+    image: postgres:15
+    container_name: db_producto
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ms_producto
+    ports:
+      - "5433:5432"
+    volumes:
+      - db_producto_data:/var/lib/postgresql/data
+    restart: always
+
+  # ---------------------------
+  #  Base de datos del MS-DETALLEPEDIDO
+  # ---------------------------
+  db_detallepedido:
+    image: postgres:15
+    container_name: db_detallepedido
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ms_detallepedido
+    ports:
+      - "5434:5432"
+    volumes:
+      - db_detallepedido_data:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  db_producto_data:
+  db_detallepedido_data:
