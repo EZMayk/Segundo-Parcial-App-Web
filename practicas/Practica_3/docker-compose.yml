@@ -1,0 +1,67 @@
+version: "3.8"
+
+services:
+  # Backend NestJS (Practica_1 base)
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    container_name: practica3-backend
+    ports:
+      - "3002:3002"
+    environment:
+      NODE_ENV: development
+      PORT: 3002
+      DATABASE_PATH: ./database.sqlite
+    volumes:
+      - ./apps/backend/src:/app/src
+    command: npm start
+    networks:
+      - practica3-net
+
+  # MCP Server
+  mcp-server:
+    build:
+      context: ./apps/mcp-server
+      dockerfile: Dockerfile
+    container_name: practica3-mcp-server
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      BACKEND_URL: http://backend:3002
+    depends_on:
+      - backend
+    volumes:
+      - ./apps/mcp-server/src:/app/src
+    command: npm run dev
+    networks:
+      - practica3-net
+
+  # API Gateway con Gemini
+  api-gateway:
+    build:
+      context: ./apps/api-gateway
+      dockerfile: Dockerfile
+    container_name: practica3-api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      MCP_SERVER_URL: http://mcp-server:3001
+      BACKEND_URL: http://backend:3002
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+    depends_on:
+      - backend
+      - mcp-server
+    volumes:
+      - ./apps/api-gateway/src:/app/src
+    command: npm run start:dev
+    networks:
+      - practica3-net
+
+networks:
+  practica3-net:
+    driver: bridge
